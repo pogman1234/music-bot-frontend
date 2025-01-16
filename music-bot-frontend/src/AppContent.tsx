@@ -1,18 +1,10 @@
 import React, { createContext, useReducer, ReactNode } from 'react';
-
-// Define the shape of a track object
-interface Track {
-  title: string;
-  artist?: string;
-  source?: string;
-  thumbnail?: string;
-  url: string;
-}
+import { Track } from './types/queue';
 
 // Define the shape of your application state
 interface AppState {
-  currentTrack: Track | null;
   queue: Track[];
+  currentTrack: Track | null;
   volume: number;
   currentPosition: number;
   // Add other state properties as needed
@@ -29,8 +21,8 @@ type AppAction =
 
 // Initial state
 const initialState: AppState = {
-  currentTrack: null,
   queue: [],
+  currentTrack: null,
   volume: 0.5,
   currentPosition: 0,
 };

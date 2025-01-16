@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { List, ListItem, ListItemAvatar, Avatar, ListItemText, Typography, Divider, CircularProgress } from '@mui/material';
 import { AppContext } from '../../AppContent';
-import { QueueState, Track } from '../../types/queue';
+import { Track, QueueState } from '../../types/queue';
 
 const API_BASE_URL = 'https://poggles-discord-bot-235556599709.us-east1.run.app';
 
-const Queue = () => {
+const Queue: React.FC = () => {
   const { state, dispatch } = useContext(AppContext);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,15 +43,25 @@ const Queue = () => {
 
   return (
     <List>
-      {state.queue.map((track: Track, index: number) => (
-        <React.Fragment key={index}>
+      {state.queue?.map((track: Track, index: number) => (
+        <React.Fragment key={`${track.info.url}-${index}`}>
           <ListItem>
             <ListItemAvatar>
-              <Avatar src={track.thumbnail} />
+              <Avatar src={track.info.thumbnail} />
             </ListItemAvatar>
             <ListItemText
-              primary={track.title}
-              secondary={track.duration}
+              primary={track.info.title}
+              secondary={
+                <React.Fragment>
+                  <Typography component="span" variant="body2" color="textPrimary">
+                    {track.info.duration}
+                  </Typography>
+                  <br />
+                  <Typography component="span" variant="body2" color="textSecondary">
+                    Requested by: {track.requester}
+                  </Typography>
+                </React.Fragment>
+              }
             />
           </ListItem>
           {index < state.queue.length - 1 && <Divider />}
