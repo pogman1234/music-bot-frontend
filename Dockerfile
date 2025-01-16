@@ -11,13 +11,19 @@ COPY music-bot-frontend/package*.json ./
 RUN npm ci
 
 # Copy the rest of the application source
-COPY music-bot-frontend/ .
+COPY music-bot-frontend/ ./
 
 # Build the application
 RUN npm run build
 
 # Stage 2: Serve the application with a lightweight webserver
 FROM nginx:alpine
+
+# Remove default NGINX configuration
+RUN rm /etc/nginx/conf.d/default.conf
+
+# Copy custom NGINX configuration
+COPY music-bot-frontend/nginx.conf /etc/nginx/conf.d
 
 # Copy built application from the builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
