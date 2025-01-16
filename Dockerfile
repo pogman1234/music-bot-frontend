@@ -5,13 +5,13 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copy package.json and package-lock.json (or yarn.lock)
-COPY package*.json ./
+COPY music-bot-frontend/package*.json ./
 
 # Install dependencies
 RUN npm ci
 
 # Copy the rest of the application source
-COPY . .
+COPY music-bot-frontend/ .
 
 # Build the application
 RUN npm run build
