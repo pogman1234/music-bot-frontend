@@ -1,7 +1,27 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
-}
+
+  "compilerOptions": {
+    "typeRoots": ["node_modules/@types"],
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "target": "es5",
+    "lib": ["es6", "dom"],
+    "module": "ES6",
+    "jsx": "react-jsx",
+    "noImplicitAny": true,
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    
+  },
+  "include": ["src"],
+   "files": [],
+  
+   "references": [
+  
+      { "path": "./tsconfig.app.json" },
+  
+      { "path": "./tsconfig.node.json" }
+  
+    ]
+  
+  }
