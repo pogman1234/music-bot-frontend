@@ -1,50 +1,62 @@
-import React from 'react';
-import { useContext } from 'react';
-import { List, ListItem, ListItemAvatar, Avatar, ListItemText, Typography, Divider, useTheme } from '@mui/material';
+import React, { useContext, useEffect, useState } from 'react';
+import { List, ListItem, ListItemAvatar, Avatar, ListItemText, Typography, Divider, CircularProgress } from '@mui/material';
 import { AppContext } from '../../AppContent';
+import { QueueState, Track } from '../../types/queue';
+
+const API_BASE_URL = 'https://poggles-discord-bot-235556599709.us-east1.run.app';
 
 const Queue = () => {
-  const { state } = useContext(AppContext);
-  const theme = useTheme();
-  const queue = state.queue;
+  const { state, dispatch } = useContext(AppContext);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchQueue = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/queue`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch queue');
+      }
+      const data: QueueState = await response.json();
+      // Extract just the tracks array from the queue state
+      dispatch({ type: 'SET_QUEUE', payload: data.tracks });
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchQueue();
+    const interval = setInterval(fetchQueue, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading) {
+    return <CircularProgress />;
+  }
+
+  if (error) {
+    return <Typography color="error">{error}</Typography>;
+  }
 
   return (
-    <List sx={{ width: '100%', bgcolor: theme.palette.background.paper }}>
-      <Typography variant="h6" sx={{ p: 2, fontWeight: 'bold' }}>
-        Queue
-      </Typography>
-      <Divider />
-      {queue.map((track: any, index: any) => (
+    <List>
+      {state.queue.map((track: Track, index: number) => (
         <React.Fragment key={index}>
-          <ListItem alignItems="flex-start">
+          <ListItem>
             <ListItemAvatar>
-              <Avatar alt={track.title} src={track.thumbnail} /> {/* Display thumbnail if available */}
+              <Avatar src={track.thumbnail} />
             </ListItemAvatar>
             <ListItemText
               primary={track.title}
-              secondary={
-                <React.Fragment>
-                  <Typography
-                    sx={{ display: 'inline' }}
-                    component="span"
-                    variant="body2"
-                    color="text.primary"
-                  >
-                    {track.artist} {/* Display artist if available */}
-                  </Typography>
-                  {` - ${track.source}`} {/* Display source if available */}
-                </React.Fragment>
-              }
+              secondary={track.duration}
             />
           </ListItem>
-          <Divider variant="inset" component="li" />
+          {index < state.queue.length - 1 && <Divider />}
         </React.Fragment>
       ))}
-      {queue.length === 0 && (
-        <Typography variant="body1" sx={{ p: 2 }}>
-          The queue is empty.
-        </Typography>
-      )}
     </List>
   );
 };

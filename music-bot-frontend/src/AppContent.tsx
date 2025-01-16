@@ -14,22 +14,25 @@ interface AppState {
   currentTrack: Track | null;
   queue: Track[];
   volume: number;
+  currentPosition: number;
   // Add other state properties as needed
 }
 
 // Action types
-type AppAction =
+type AppAction = 
+  | { type: 'SET_QUEUE'; payload: Track[] }
+  | { type: 'SET_POSITION'; payload: number }
   | { type: 'SET_CURRENT_TRACK'; payload: Track | null }
   | { type: 'ADD_TO_QUEUE'; payload: Track }
   | { type: 'REMOVE_FROM_QUEUE'; payload: number } // index of track to remove
-  | { type: 'SET_VOLUME'; payload: number }
-  | { type: 'SET_QUEUE'; payload: Track[] }; // Add this action type
+  | { type: 'SET_VOLUME'; payload: number };
 
 // Initial state
 const initialState: AppState = {
   currentTrack: null,
   queue: [],
   volume: 0.5,
+  currentPosition: 0,
 };
 
 // Create the context
@@ -57,6 +60,8 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
       return { ...state, volume: action.payload };
     case 'SET_QUEUE':
       return { ...state, queue: action.payload };
+    case 'SET_POSITION':
+      return { ...state, currentPosition: action.payload };
     default:
       return state;
   }
