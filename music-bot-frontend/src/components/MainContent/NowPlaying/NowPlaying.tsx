@@ -3,12 +3,7 @@ import { Card, CardContent, Box, Typography } from '@mui/material';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import { useTheme } from '@mui/material/styles';
 import { AppContext } from '../../../AppContent';
-import { Track } from '../../../types/queue';
 
-interface CurrentlyPlayingResponse {
-  song: Track | null;
-  isPlaying: boolean;
-}
 
 const API_BASE_URL = 'https://poggles-discord-bot-235556599709.us-east1.run.app';
 
@@ -23,8 +18,10 @@ const NowPlaying: React.FC = () => {
       if (!response.ok) {
         throw new Error('Failed to fetch current track');
       }
-      const data: CurrentlyPlayingResponse = await response.json();
-      dispatch({ type: 'SET_CURRENT_TRACK', payload: data.song });
+      const data = await response.json();
+      if (data.song) {
+        dispatch({ type: 'SET_CURRENT_TRACK', payload: data.song });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     }
@@ -53,9 +50,6 @@ const NowPlaying: React.FC = () => {
           <>
             <Typography variant="h5" component="div" sx={{ fontWeight: 'bold' }}>
               {state.currentTrack ? state.currentTrack.info.title : 'Nothing Playing'}
-            </Typography>
-            <Typography variant="subtitle1" color="text.secondary" component="div">
-              {state.currentTrack?.info.author || ''}
             </Typography>
             <Typography variant="caption" color="text.secondary" component="div">
               {state.currentTrack ? `Source: ${state.currentTrack.info.url}` : ''}
