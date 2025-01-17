@@ -12,15 +12,26 @@ const Queue: React.FC = () => {
 
   const fetchQueue = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/queue`);
+      const response = await fetch(`${API_BASE_URL}/api/queue`, {
+        // Add CORS mode explicitly
+        mode: 'cors',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      
       if (!response.ok) {
-        throw new Error('Failed to fetch queue');
+        // Log specific error details
+        console.error('Response status:', response.status);
+        console.error('Response status text:', response.statusText);
+        throw new Error(`Failed to fetch queue: ${response.statusText}`);
       }
+      
       const data: QueueState = await response.json();
-      // Extract just the tracks array from the queue state
       dispatch({ type: 'SET_QUEUE', payload: data.tracks });
       setError(null);
     } catch (err) {
+      console.error('Fetch error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
