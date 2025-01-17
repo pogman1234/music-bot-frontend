@@ -1,7 +1,20 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { List, ListItem, ListItemAvatar, Avatar, ListItemText, Typography, Divider, CircularProgress } from '@mui/material';
+import { List, ListItem, ListItemAvatar, Avatar, ListItemText, Typography, Divider, CircularProgress, Paper } from '@mui/material';
 import { AppContext } from '../../AppContent';
-import { Track, QueueState } from '../../types/queue';
+
+interface QueueItem {
+  url: string;
+  title: string;
+  duration: number;
+  thumbnail: string;
+  filepath: string;
+  is_downloaded: boolean;
+  video_id: string;
+}
+
+interface QueueResponse {
+  queue: QueueItem[];
+}
 
 const API_BASE_URL = 'https://poggles-discord-bot-235556599709.us-east1.run.app';
 
@@ -17,21 +30,18 @@ const Queue: React.FC = () => {
         throw new Error(`Failed to fetch queue: ${response.statusText}`);
       }
       
-      const rawData = await response.json();
-      // Transform the data to match Track type
-      const formattedData: QueueState = {
-        tracks: rawData.queue.map((item: { url: string; title: string; duration: string; thumbnail: string }) => ({
+      const data: QueueResponse = await response.json();
+      dispatch({ 
+        type: 'SET_QUEUE', 
+        payload: data.queue.map(item => ({
           info: {
             url: item.url,
             title: item.title,
-            duration: item.duration,
             thumbnail: item.thumbnail,
-          },
-          requester: "Unknown" // Add default requester if not provided
+            duration: item.duration
+          }
         }))
-      };
-      
-      dispatch({ type: 'SET_QUEUE', payload: formattedData.tracks });
+      });
       setError(null);
     } catch (err) {
       console.error('Fetch error:', err);
@@ -56,32 +66,54 @@ const Queue: React.FC = () => {
   }
 
   return (
-    <List>
-      {state.queue?.map((track: Track, index: number) => (
-        <React.Fragment key={`${track.info.url}-${index}`}>
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar src={track.info.thumbnail} />
-            </ListItemAvatar>
-            <ListItemText
-              primary={track.info.title}
-              secondary={
-                <React.Fragment>
-                  <Typography component="span" variant="body2" color="textPrimary">
-                    {track.info.duration}
-                  </Typography>
-                  <br />
+    <Paper 
+      sx={{ 
+        padding: 2,
+        width: '100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+        border: '1px solid rgba(255, 255, 255, 0.1)'
+      }}
+    >
+      <Typography 
+        variant="h5" 
+        component="h2"
+        sx={{ 
+          fontWeight: 700,
+          marginBottom: 3,
+          textAlign: 'center',
+          color: '#fff',
+          textTransform: 'uppercase',
+          letterSpacing: '0.1em'
+        }}
+      >
+        Queue
+      </Typography>
+      <List>
+        {state.queue?.map((track, index) => (
+          <React.Fragment key={`${track.info.url}-${index}`}>
+            <ListItem>
+              <ListItemAvatar>
+                <Avatar src={track.info.thumbnail} />
+              </ListItemAvatar>
+              <ListItemText
+                primary={track.info.title}
+                secondary={
                   <Typography component="span" variant="body2" color="textSecondary">
-                    Requested by: {track.requester}
+                    Duration: {track.info.duration} seconds
                   </Typography>
-                </React.Fragment>
-              }
-            />
-          </ListItem>
-          {index < state.queue.length - 1 && <Divider />}
-        </React.Fragment>
-      ))}
-    </List>
+                }
+              />
+            </ListItem>
+            {index < state.queue.length - 1 && <Divider />}
+          </React.Fragment>
+        ))}
+        {(!state.queue || state.queue.length === 0) && (
+          <Typography variant="body1" align="center" sx={{ py: 2 }}>
+            Queue is empty
+          </Typography>
+        )}
+      </List>
+    </Paper>
   );
 };
 
