@@ -6,20 +6,17 @@ export interface SongInfo {
     author: string;
 }
 
-interface Track {
-
-  title: string;
-
+export interface TrackInfo {
   url: string;
-
-  thumbnail: string;
-
+  title: string;
   duration: number;
-
-  isPlaying: boolean;
-
+  thumbnail: string;
 }
 
+export interface Track {
+  info: TrackInfo;
+  isPlaying?: boolean;
+}
 
 export interface QueueState {
   tracks: Track[];

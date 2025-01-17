@@ -1,61 +1,64 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Card, CardContent, Box, Typography } from '@mui/material';
-import MusicNoteIcon from '@mui/icons-material/MusicNote';
+import React from 'react';
+import { Card, CardContent, Box, Typography, Avatar } from '@mui/material';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PauseIcon from '@mui/icons-material/Pause';
 import { useTheme } from '@mui/material/styles';
-import { AppContext } from '../../../AppContent';
 
+interface CurrentSong {
+  url: string;
+  title: string;
+  duration: number;
+  thumbnail: string;
+  filepath: string;
+  is_downloaded: boolean;
+  video_id: string;
+}
 
-const API_BASE_URL = 'https://poggles-discord-bot-235556599709.us-east1.run.app';
+interface NowPlayingProps {
+  isPlaying: boolean;
+  currentSong: CurrentSong;
+}
 
-const NowPlaying: React.FC = () => {
-  const { state, dispatch } = useContext(AppContext);
+const NowPlaying: React.FC<NowPlayingProps> = ({ isPlaying, currentSong }) => {
   const theme = useTheme();
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchCurrentTrack = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/currently-playing`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch current track');
-      }
-      const data = await response.json();
-      if (data.song) {
-        dispatch({ type: 'SET_CURRENT_TRACK', payload: data.song });
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    }
-  };
-
-  useEffect(() => {
-    // Fetch initially
-    fetchCurrentTrack();
-
-    // Set up polling every 5 seconds
-    const interval = setInterval(fetchCurrentTrack, 5000);
-
-    // Cleanup on unmount
-    return () => clearInterval(interval);
-  }, []);
 
   return (
-    <Card sx={{ mb: 2, display: 'flex', alignItems: 'center', backgroundColor: theme.palette.mode === 'dark' ? '#282c34' : '#e0e0e0' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', p: 2 }}>
-        <MusicNoteIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />
-      </Box>
+    <Card sx={{ mb: 2 }}>
       <CardContent>
-        {error ? (
-          <Typography color="error">{error}</Typography>
-        ) : (
-          <>
-            <Typography variant="h5" component="div" sx={{ fontWeight: 'bold' }}>
-              {state.currentTrack ? state.currentTrack.info.title : 'Nothing Playing'}
+        <Box display="flex" alignItems="center" gap={2}>
+          <Avatar
+            variant="rounded"
+            src={currentSong.thumbnail}
+            alt={currentSong.title}
+            sx={{ width: 120, height: 90 }}
+          />
+          <Box>
+            <Typography variant="h6" component="div">
+              {currentSong.title}
             </Typography>
-            <Typography variant="caption" color="text.secondary" component="div">
-              {state.currentTrack ? `Source: ${state.currentTrack.info.url}` : ''}
+            <Box display="flex" alignItems="center" gap={1}>
+              {isPlaying ? <PlayArrowIcon /> : <PauseIcon />}
+              <Typography variant="body2" color="text.secondary">
+                {isPlaying ? "Playing" : "Paused"}
+              </Typography>
+            </Box>
+            <Typography 
+              component="a"
+              href={currentSong.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ 
+                color: theme.palette.primary.main,
+                textDecoration: 'none',
+                '&:hover': {
+                  textDecoration: 'underline'
+                }
+              }}
+            >
+              View on YouTube
             </Typography>
-          </>
-        )}
+          </Box>
+        </Box>
       </CardContent>
     </Card>
   );

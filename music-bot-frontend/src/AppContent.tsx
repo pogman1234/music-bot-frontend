@@ -1,25 +1,21 @@
 import React, { createContext, useReducer, ReactNode } from 'react';
 import { Track } from './types/queue';
 
-// Define the shape of your application state
 interface AppState {
   queue: Track[];
   currentTrack: Track | null;
   volume: number;
   currentPosition: number;
-  // Add other state properties as needed
 }
 
-// Action types
 type AppAction = 
   | { type: 'SET_QUEUE'; payload: Track[] }
   | { type: 'SET_POSITION'; payload: number }
   | { type: 'SET_CURRENT_TRACK'; payload: Track | null }
   | { type: 'ADD_TO_QUEUE'; payload: Track }
-  | { type: 'REMOVE_FROM_QUEUE'; payload: number } // index of track to remove
+  | { type: 'REMOVE_FROM_QUEUE'; payload: number }
   | { type: 'SET_VOLUME'; payload: number };
 
-// Initial state
 const initialState: AppState = {
   queue: [],
   currentTrack: null,
@@ -27,7 +23,6 @@ const initialState: AppState = {
   currentPosition: 0,
 };
 
-// Create the context
 export const AppContext = createContext<{
   state: AppState;
   dispatch: React.Dispatch<AppAction>;

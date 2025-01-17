@@ -1,0 +1,39 @@
+.now-playing {
+  padding: 1rem;
+  border-radius: 8px;
+  background: #f5f5f5;
+}
+
+.song-info {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.thumbnail {
+  width: 120px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.status {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.youtube-link {
+  color: #ff0000;
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
+.youtube-link:hover {
+  text-decoration: underline;
+}

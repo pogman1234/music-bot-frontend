@@ -10,7 +10,18 @@ const MainContent = () => {
           Poggy's Music Bot
         </Typography>
 
-        <NowPlaying />
+        <NowPlaying 
+          isPlaying={false} // Replace with actual state
+          currentSong={{
+            url: '',
+            title: 'No song playing',
+            duration: 0,
+            thumbnail: '',
+            filepath: '',
+            is_downloaded: false,
+            video_id: ''
+          }}
+        />
 
         <Box sx={{ 
           backgroundColor: 'background.paper',
