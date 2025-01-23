@@ -13,6 +13,10 @@ RUN npm ci
 # Copy the rest of the application source
 COPY music-bot-frontend/ ./
 
+# Set the environment variable during build using ARG
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+
 # Build the application
 RUN npm run build
 

@@ -1,0 +1,62 @@
+/* Queue.css */
+
+.queue-container {
+    width: 100%;
+  }
+  
+  .queue-status {
+    margin-bottom: 0.5rem;
+  }
+  
+  .queue-error {
+    color: red;
+  }
+  
+  .queue-loading {
+    /* Add styles for loading state if needed */
+  }
+  
+  .queue-empty {
+    /* Add styles for empty state if needed */
+  }
+  
+  .queue-header {
+    font-size: 1.2rem;
+    margin: 0.5rem 0;
+  }
+  
+  /* Updated styles for track items */
+  .queue-track-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    /* Remove border and background */
+    border: none;
+    background-color: transparent; 
+    border-radius: 4px; /* Optional: Keep rounded corners if you like */
+  }
+  
+  .queue-track-item:hover {
+      background-color: rgba(255, 255, 255, 0.1); /* Add a very subtle highlight on hover */
+  }
+  
+  .queue-track-thumbnail {
+    width: 60px;
+    height: 60px;
+    margin-right: 0.8rem;
+    border-radius: 4px;
+  }
+  
+  .queue-track-info {
+    flex-grow: 1;
+  }
+  
+  .queue-track-title {
+    font-size: 0.9rem;
+  }
+  
+  .queue-track-duration {
+    font-size: 0.7rem;
+    margin-top: 0.2rem;
+  }

@@ -1,3 +1,6 @@
+docker build -t discord-music-bot .
+docker run --env-file ./.env.development -p 3000:8080 discord-music-bot
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

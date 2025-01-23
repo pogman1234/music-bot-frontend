@@ -5,7 +5,7 @@ import PauseIcon from '@mui/icons-material/Pause';
 import { useTheme } from '@mui/material/styles';
 import { NowPlayingProps } from '../../../types/nowplaying';
 
-const API_BASE_URL = 'https://poggles-discord-bot-235556599709.us-east1.run.app';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const NowPlaying: React.FC<NowPlayingProps> = ({ isPlaying, currentSong }) => {
   const theme = useTheme();
@@ -23,26 +23,33 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ isPlaying, currentSong }) => {
   };
 
   useEffect(() => {
-    const fetchCurrentlyPlaying = async () => {
+    const eventSource = new EventSource(`${API_BASE_URL}/sse/currently-playing`);
+
+    eventSource.onopen = () => {
+      setLoading(false);
+      setError(null);
+    };
+
+    eventSource.onmessage = (event) => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/currently-playing`);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch currently playing: ${response.statusText}`);
-        }
-        const data: NowPlayingProps = await response.json();
+        const data: NowPlayingProps = JSON.parse(event.data);
         setPlayingData(data);
-        setError(null);
-        setLoading(false);
-      } catch (err) {
-        setPlayingData({ isPlaying, currentSong }); // Fallback to props if fetch fails
-        setError(err instanceof Error ? err.message : 'An error occurred');
-        setLoading(false);
+      } catch (error) {
+        setError('Failed to parse SSE data');
+        console.error('Failed to parse SSE data', error);
       }
     };
 
-    fetchCurrentlyPlaying();
-    const interval = setInterval(fetchCurrentlyPlaying, 5000);
-    return () => clearInterval(interval);
+    eventSource.onerror = () => {
+      setError('SSE connection error');
+      setPlayingData({ isPlaying, currentSong });
+      setLoading(false);
+      eventSource.close();
+    };
+
+    return () => {
+      eventSource.close();
+    };
   }, [isPlaying, currentSong]);
 
   if (loading) {
