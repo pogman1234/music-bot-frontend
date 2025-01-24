@@ -14,6 +14,12 @@ interface TrackData {
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+const formatDuration = (seconds: number): string => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+};
+
 const Queue: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [queueData, setQueueData] = useState<QueueState>({ tracks: [] });
@@ -126,7 +132,9 @@ const Queue: React.FC = () => {
                 )}
                 <div className="queue-track-info">
                   <div className="queue-track-title">{track.info.title}</div>
-                  <div className="queue-track-duration">Duration: {track.info.duration}</div>
+                  <div className="queue-track-duration">
+                    Duration: {formatDuration(track.info.duration)}
+                  </div>
                 </div>
               </div>
             ))

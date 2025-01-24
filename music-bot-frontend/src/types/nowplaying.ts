@@ -1,14 +1,25 @@
+export interface Duration {
+  current: number;
+  total: number;
+  formatted: string;
+}
+
 export interface CurrentSong {
-  url: string;
+  id: string;
   title: string;
   duration: number;
   thumbnail: string;
-  filepath: string;
+  webpage_url: string;
   is_downloaded: boolean;
-  video_id: string;
+  filepath: string;
+  error: string;
+  timestamp: number;
 }
 
-export interface NowPlayingProps {
+export interface PlayingData {
   isPlaying: boolean;
   currentSong: CurrentSong;
+  duration: Duration;
+  error: string | null;
+  timestamp: number;
 }

@@ -13,14 +13,23 @@ const MainContent: React.FC = () => {
         <NowPlaying 
           isPlaying={false}
           currentSong={{
-            url: '',
+            id: '',
             title: '',
             duration: 0,
             thumbnail: '',
-            filepath: '',
+            webpage_url: '',
             is_downloaded: false,
-            video_id: ''
+            filepath: '',
+            error: '',
+            timestamp: 0
           }}
+          duration={{
+            current: 0,
+            total: 0,
+            formatted: '0:00/0:00'
+          }}
+          error={null}
+          timestamp={0}
         />
 
         <Box sx={{ 
