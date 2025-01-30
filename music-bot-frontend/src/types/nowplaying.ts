@@ -10,16 +10,15 @@ export interface CurrentSong {
   duration: number;
   thumbnail: string;
   webpage_url: string;
-  is_downloaded: boolean;
-  filepath: string;
-  error: string;
-  timestamp: number;
 }
 
 export interface PlayingData {
-  isPlaying: boolean;
-  currentSong: CurrentSong;
-  duration: Duration;
+  guild_id: number;
+  is_playing: boolean;
+  current_song: CurrentSong | null;
+  progress: string;
+  position: number;
+  duration: number;
   error: string | null;
   timestamp: number;
 }

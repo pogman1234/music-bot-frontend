@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Card, CardContent, Box, Typography, Avatar, CircularProgress, LinearProgress } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
+import MusicOffIcon from '@mui/icons-material/MusicOff';
 import { useTheme } from '@mui/material/styles';
-import { PlayingData, CurrentSong, Duration } from '../../../types/nowplaying';
+import { PlayingData } from '../../../types/nowplaying';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -17,119 +18,146 @@ const formatDuration = (current: number, total: number): string => {
   return `${formatTime(current)}/${formatTime(total)}`;
 };
 
-const NowPlaying: React.FC<PlayingData> = ({ isPlaying, currentSong }) => {
+const NowPlaying: React.FC<{ guildId: string }> = ({ guildId }) => {
   const theme = useTheme();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [playingData, setPlayingData] = useState<{
-    isPlaying: boolean;
-    currentSong: CurrentSong;
-    duration: Duration;
-  }>({ 
-    isPlaying,
-    currentSong,
-    duration: { current: 0, total: 0, formatted: '0:00/0:00' }
-  });
+  const [playingData, setPlayingData] = useState<PlayingData | null>(null);
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const currentGuildRef = useRef<string>('');
 
   useEffect(() => {
-    const eventSource = new EventSource(`${API_BASE_URL}/sse/currently-playing`);
+    let mounted = true;
+    let reconnectTimeout: number;
 
-    eventSource.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        setPlayingData(data);
+    const connectSSE = () => {
+      // Don't reconnect if already connected to this guild
+      if (currentGuildRef.current === guildId && eventSourceRef.current) {
+        return;
+      }
+
+      // Clean up existing connection
+      if (eventSourceRef.current) {
+        console.log('[NowPlaying] Closing existing connection');
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+
+      console.log(`[NowPlaying] Connecting to guild ${guildId}`);
+      const newEventSource = new EventSource(`${API_BASE_URL}/sse/currently_playing/${guildId}`);
+      eventSourceRef.current = newEventSource;
+      currentGuildRef.current = guildId;
+
+      newEventSource.onopen = () => {
+        if (!mounted) return;
+        console.log('[NowPlaying] Connected');
         setLoading(false);
         setError(null);
-      } catch (error) {
-        setError('Failed to parse SSE data');
-        console.error('Failed to parse SSE data', error);
-      }
+      };
+
+      newEventSource.onmessage = (event) => {
+        if (!mounted) return;
+        try {
+          const data = JSON.parse(event.data);
+          console.log('Received playing data:', data);
+          setPlayingData(data);
+        } catch (err) {
+          console.error('Error parsing playing data:', err);
+          setPlayingData(null);
+        }
+      };
+
+      newEventSource.onerror = () => {
+        if (!mounted) return;
+        console.error('[NowPlaying] Connection error, attempting to reconnect...');
+        setError('Connection error, attempting to reconnect...');
+        if (eventSourceRef.current) {
+          eventSourceRef.current.close();
+          eventSourceRef.current = null;
+        }
+        reconnectTimeout = window.setTimeout(connectSSE, 5000);
+      };
     };
 
-    eventSource.onerror = () => {
-      setError('SSE connection error');
-      setLoading(false);
-      eventSource.close();
-    };
+    if (guildId) {
+      connectSSE();
+    }
 
     return () => {
-      eventSource.close();
+      mounted = false;
+      clearTimeout(reconnectTimeout);
+      if (eventSourceRef.current) {
+        console.log('[NowPlaying] Cleanup: closing connection');
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
     };
-  }, []);
-
-  const progress = playingData.duration.total > 0 
-    ? (playingData.duration.current / playingData.duration.total) * 100 
-    : 0;
+  }, [guildId]); // Remove eventSource from dependencies
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" m={2}>
-        <CircularProgress />
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 4 }}>
+        <CircularProgress sx={{ color: theme.palette.primary.main }} />
       </Box>
     );
   }
 
   if (error) {
     return (
-      <Typography color="error" m={2}>
-        {error}
+      <Typography color="error" sx={{ p: 2 }}>
+        Error: {error}
       </Typography>
     );
   }
 
-  if (!playingData.currentSong) {
+  if (!playingData?.current_song) {
     return (
-      <Typography color="textSecondary" m={2}>
-        No song currently playing
-      </Typography>
+      <Card sx={{ backgroundColor: theme.palette.background.paper, boxShadow: theme.shadows[3] }}>
+        <CardContent>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3, gap: 2 }}>
+            <MusicOffIcon sx={{ color: theme.palette.text.secondary, fontSize: '2rem' }} />
+            <Typography variant="h6" sx={{ color: theme.palette.text.secondary, fontWeight: 500 }}>
+              No track currently playing
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <Card sx={{
-      backgroundColor: theme.palette.background.paper,
-      transition: theme.transitions.create(['transform', 'box-shadow']),
-      '&:hover': {
-        transform: 'scale(1.02)',
-        boxShadow: theme.shadows[4],
-      },
-      margin: theme.spacing(2)
-    }}>
+    <Card sx={{ backgroundColor: theme.palette.background.paper, boxShadow: theme.shadows[3] }}>
       <CardContent>
-        <Box display="flex" alignItems="center" gap={theme.spacing(2)}>
-          <Avatar
-            src={playingData.currentSong.thumbnail}
-            alt={playingData.currentSong.title}
-            sx={{ width: 56, height: 56 }}
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Avatar 
+            src={playingData.current_song.thumbnail} 
+            variant="square" 
+            sx={{ width: 56, height: 56, marginRight: 2, boxShadow: theme.shadows[2] }} 
           />
-          {playingData.isPlaying ? (
-            <PauseIcon sx={{ color: theme.palette.primary.main }} />
-          ) : (
-            <PlayArrowIcon sx={{ color: theme.palette.primary.main }} />
-          )}
-          <Box sx={{ width: '100%' }}>
-            <Typography variant="h6" color={theme.palette.text.primary}>
-              {playingData.currentSong.title}
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="h6" sx={{ color: theme.palette.text.primary, fontWeight: 500 }}>
+              {playingData.current_song.title}
             </Typography>
-            <Box sx={{ width: '100%', mt: 1 }}>
-              <LinearProgress 
-                variant="determinate" 
-                value={progress} 
-                sx={{
-                  height: 4,
-                  borderRadius: 2,
-                  mb: 0.5,
-                  backgroundColor: theme.palette.grey[800],
-                  '& .MuiLinearProgress-bar': {
-                    backgroundColor: theme.palette.primary.main,
-                  }
-                }}
-              />
-              <Typography variant="body2" color={theme.palette.text.secondary}>
-                {playingData.duration.formatted || formatDuration(playingData.duration.current, playingData.duration.total)}
-              </Typography>
-            </Box>
+            <Typography variant="body2" sx={{ color: theme.palette.text.secondary, mb: 1 }}>
+              {formatDuration(playingData.position, playingData.duration)}
+            </Typography>
+            <LinearProgress 
+              variant="determinate" 
+              value={(playingData.position / playingData.duration) * 100}
+              sx={{
+                backgroundColor: theme.palette.grey[800],
+                height: 4,
+                '& .MuiLinearProgress-bar': {
+                  backgroundColor: theme.palette.primary.main
+                }
+              }}
+            />
           </Box>
+          {playingData.is_playing ? (
+            <PlayArrowIcon sx={{ color: theme.palette.primary.main }} />
+          ) : (
+            <PauseIcon sx={{ color: theme.palette.primary.main }} />
+          )}
         </Box>
       </CardContent>
     </Card>

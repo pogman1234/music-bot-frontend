@@ -7,10 +7,13 @@ export interface SongInfo {
 }
 
 export interface TrackInfo {
-  url: string;
+  id: string;
   title: string;
   duration: number;
   thumbnail: string;
+  webpage_url: string;
+  is_downloaded: boolean;
+  filepath: string | null;
 }
 
 export interface Track {
