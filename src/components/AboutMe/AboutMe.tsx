@@ -135,7 +135,7 @@ const AboutMe: React.FC = () => (
         image={project1} />
         <ProjectCard title="pogman.xyz" 
         description="
-        I then have my website which is a frontend hosted on Cloud Run, which connects to another Cloud Run instance that serves as the backend.
+        I then have my website which is a frontend hosted on Firebase, which connects to another Cloud Run instance that serves as the backend.
         The backend is a music bot that I have been working on for a while now written in Python which uses the discord.py library. My friends and I use it to play music in our discord server.
         " 
         image={project2} />

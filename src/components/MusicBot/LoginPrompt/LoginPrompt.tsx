@@ -27,6 +27,9 @@ const LoginPrompt: React.FC = () => {
         Welcome to Poggy's Music Bot
       </Typography>
       <Typography variant="body1" gutterBottom>
+        If you are not in a server with the bot, you won't be able to use this feature.
+      </Typography>
+      <Typography variant="body1" gutterBottom>
         Please log in with Discord to access the features.
       </Typography>
       <Button
