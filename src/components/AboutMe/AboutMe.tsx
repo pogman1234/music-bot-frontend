@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Typography, Avatar, Chip, Grid, Card, CardContent, CardMedia, Modal, Backdrop, Fade } from '@mui/material';
-import HomeHeader from './AboutMeHeader';
+import HomeHeader from '../Home/HomeHeader';
 import nicImage from '../../assets/nic.png';
 import project1 from '../../assets/proxmox.png';
 import project2 from '../../assets/project2.png';
@@ -92,9 +92,9 @@ const ProjectCard: React.FC<{ title: string; description: string; image: string 
   );
 };
 
-const Home: React.FC = () => (
+const AboutMe: React.FC = () => (
   <>
-    <HomeHeader />
+    <HomeHeader /> 
     <Box sx={{ 
       display: 'flex', 
       flexDirection: 'column', 
@@ -112,7 +112,7 @@ const Home: React.FC = () => (
         Nicholas
       </Typography>
       <Typography variant="body1" align="center">
-        SRE | Web Developer | Building Reliable and Scalable Systems
+        SRE | Web | Software Engineer | Building Reliable and Scalable Systems
       </Typography>
     </Box>
     <Box sx={{ justifyContent: 'center', alignItems: 'center', padding: '1rem', bgcolor: 'background.paper', color: 'text.primary'}}>
@@ -171,4 +171,4 @@ const Home: React.FC = () => (
   </>
 );
 
-export default Home;
+export default AboutMe;
